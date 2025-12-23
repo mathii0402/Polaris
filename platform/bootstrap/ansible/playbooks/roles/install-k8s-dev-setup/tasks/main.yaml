@@ -1,0 +1,171 @@
+---
+- name: Ensure apt-transport, ca-certificates, curl, gnupg, lsb-release are installed
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Ensure /etc/apt/keyrings exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Add Docker GPG key (dearmored)
+  shell: |
+    curl -fsSL "{{ docker_gpg_url }}" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  args:
+    executable: /bin/bash
+    creates: /etc/apt/keyrings/docker.gpg
+
+- name: Set permissions for Docker key
+  file:
+    path: /etc/apt/keyrings/docker.gpg
+    mode: "0644"
+
+- name: Add Docker apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] {{ docker_repo_base }} {{ ansible_distribution_release }} stable"
+    state: present
+    update_cache: yes
+    update_cache_retries: "{{ apt_cache_retries }}"
+    update_cache_retry_max_delay: "{{ apt_cache_retry_max_delay }}"
+
+- name: Install Docker packages (latest)
+  apt:
+    name: "{{ docker_packages }}"
+    state: latest
+    update_cache: yes
+  notify: restart docker
+
+- name: Ensure Docker service enabled and running
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Ensure ansible user is in docker group
+  become: true
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: true
+
+# - name: Activate new group membership for current session
+#   become: false
+#   shell: |
+#     newgrp docker <<EOF
+#     echo "docker group activated"
+#     EOF
+#   args:
+#     executable: /bin/bash
+
+
+- name: Add Kubernetes GPG key (dearmored)
+  shell: |
+    curl -fsSL "{{ kubernetes_repo_url }}/Release.key" | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  args:
+    executable: /bin/bash
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Set permissions for Kubernetes keyring
+  file:
+    path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    mode: "0644"
+
+- name: Add Kubernetes apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] {{ kubernetes_repo_url }} /"
+    filename: kubernetes
+    state: present
+    update_cache: yes
+
+- name: Install kubectl (latest in v1.34)
+  apt:
+    name: kubectl
+    state: latest
+    update_cache: yes
+
+- name: Download Helm install script
+  get_url:
+    url: "{{ helm_install_script_url }}"
+    dest: /tmp/get-helm-3
+    mode: '0755'
+    force: no
+
+- name: Run Helm install script (idempotent)
+  command: /tmp/get-helm-3
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Download K9s latest tarball
+  get_url:
+    url: "{{ k9s_tgz_url }}"
+    dest: /tmp/k9s.tgz
+    force: no
+
+- name: Extract K9s binary to /usr/local/bin
+  unarchive:
+    src: /tmp/k9s.tgz
+    dest: /usr/local/bin
+    remote_src: yes
+  args:
+    creates: /usr/local/bin/k9s
+
+- name: Ensure K9s is executable
+  file:
+    path: /usr/local/bin/k9s
+    mode: "0755"
+
+- name: Download Skaffold binary (latest)
+  get_url:
+    url: "{{ skaffold_url }}"
+    dest: /usr/local/bin/skaffold
+    mode: '0755'
+    force: no
+
+- name: Ensure Skaffold is executable
+  file:
+    path: /usr/local/bin/skaffold
+    mode: '0755'
+
+- name: Download Kind binary (latest)
+  get_url:
+    url: "{{ kind_url }}"
+    dest: /usr/local/bin/kind
+    mode: '0755'
+    force: no
+
+- name: Ensure Kind is executable
+  file:
+    path: /usr/local/bin/kind
+    mode: "0755"
+
+- name: Create Kind cluster if config exists and cluster not present
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  command: kind create cluster --config={{ role_path }}/files/kind-cluster.yml 
+  args:
+    creates: "/home/{{ ansible_user_id }}/.kube/config" 
+  # ignore_errors: true
+
+- name: Print installed versions
+  shell: |
+    echo "docker: $(docker --version || echo 'not found')"
+    echo "kubectl: $(kubectl version --client --short || echo 'not found')"
+    echo "helm: $(helm version --short || echo 'not found')"
+    echo "k9s: $(k9s version 2>/dev/null | head -n1 || echo 'not found')"
+    echo "skaffold: $(skaffold version --short || echo 'not found')"
+    echo "kind: $(kind --version || echo 'not found')"
+  register: versions
+  changed_when: false
+
+- name: Show installed versions
+  debug:
+    var: versions.stdout_lines

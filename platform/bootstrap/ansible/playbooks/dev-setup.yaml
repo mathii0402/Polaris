@@ -1,0 +1,29 @@
+---
+- name: Polaris Dev Environment Setup
+  hosts: dev
+  become: true
+  any_errors_fatal: true
+  roles:
+    - install-k8s-dev-setup
+  vars:
+    docker_gpg_url: "https://download.docker.com/linux/ubuntu/gpg"
+    docker_repo_base: "https://download.docker.com/linux/ubuntu"
+    kind_config: "{{ playbook_dir }}/roles/install-k8s-dev-setup/files/kind-cluster.yml"
+    kube_version: "v1.34"
+    kubernetes_repo_url: "https://pkgs.k8s.io/core:/stable:/{{ kube_version }}/deb"
+    k9s_tgz_url: "https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz"
+    skaffold_url: "https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64"
+    kind_url: "https://github.com/kubernetes-sigs/kind/releases/latest/download/kind-linux-amd64"
+    helm_install_script_url: "https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3"
+    docker_packages:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    apt_cache_retries: 5
+    apt_cache_retry_max_delay: 12
+  handlers:
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
+        enabled: yes

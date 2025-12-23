@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polaris-api
+  namespace: polaris-apps
+spec:
+  rules:
+    - host: polaris.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: polaris-api
+                port:
+                  number: 80

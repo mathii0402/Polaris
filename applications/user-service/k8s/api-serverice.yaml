@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: polaris-api
+  namespace: polaris-apps
+spec:
+  type: ClusterIP
+  selector:
+    app: polaris-api
+  ports:
+    - port: 80
+      targetPort: 8000

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: polaris-data
+  labels:
+    environment: dev
+    team: platform
+    purpose: data
