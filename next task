@@ -1,3 +1,4 @@
 * make the service runnable and accesible over the browser using ingress - Done
 * Create 2 application - Done
 * Make it communicatable (East - West) - Working
+* Added mesh service using Linkerd - Done
