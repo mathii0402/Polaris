@@ -28,19 +28,27 @@ spec:
             memory: "256Mi"
         env:
           - name: DB_HOST
-            value: postgres.polaris-data.svc.cluster.local
+            valueFrom:
+              secretKeyRef:
+                name: postgres-order-secret
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: postgres-order-secret
+                key: DB_PORT
           - name: DB_NAME
             valueFrom:
               secretKeyRef:
-                name: postgres-secret
-                key: POSTGRES_DB
+                name: postgres-order-secret
+                key: DB_NAME
           - name: DB_USER
             valueFrom:
               secretKeyRef:
-                name: postgres-secret
-                key: POSTGRES_USER
+                name: postgres-order-secret
+                key: DB_USER
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: postgres-secret
-                key: POSTGRES_PASSWORD
+                name: postgres-order-secret
+                key: DB_PASSWORD

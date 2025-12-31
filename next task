@@ -2,3 +2,4 @@
 * Create 2 application - Done
 * Make it communicatable (East - West) - Working
 * Added mesh service using Linkerd - Done
+* Linkerd mesh is messing up , lets put a hold of it and work on others
