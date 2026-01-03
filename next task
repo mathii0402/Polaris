@@ -3,3 +3,9 @@
 * Make it communicatable (East - West) - Working
 * Added mesh service using Linkerd - Done
 * Linkerd mesh is messing up , lets put a hold of it and work on others
+* enabled mTLS using istio
+* kind with default CNI is really bad while uisng mesh with Linkerd or Ishtio , in real world we should use calico for multinode clusters. For now lets move forward by putting all pods in singlr node
+
+
+Verification:
+* take an open source application and use our idp to improve its functionality, request management,service versioning, security, observability
