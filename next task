@@ -5,7 +5,9 @@
 * Linkerd mesh is messing up , lets put a hold of it and work on others
 * enabled mTLS using istio
 * kind with default CNI is really bad while uisng mesh with Linkerd or Ishtio , in real world we should use calico for multinode clusters. For now lets move forward by putting all pods in singlr node
+* looks good we can use this if polaris is installed completely
 
 
 Verification:
+* how we can pack this entirely and give it as a solution to customer
 * take an open source application and use our idp to improve its functionality, request management,service versioning, security, observability
