@@ -1,0 +1,17 @@
+# applications/order-service/manifests/base/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# List all resources in this directory
+resources:
+- deployment.yaml
+- service.yaml
+- secrets.yaml
+
+# Common labels for all resources
+commonLabels:
+  app: order-service
+  managed-by: kustomize
+
+# Default namespace
+namespace: polaris-apps
