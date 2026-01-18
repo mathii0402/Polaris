@@ -1,11 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# List ALL YAML files in this directory
 resources:
 - namespace-labels.yaml
 - install/istio-base.yaml
 - install/istiod.yaml
 - install/istio-ingress.yaml
+- policies/default-deny.yaml
+- policies/default-mtls.yaml
 
 namespace: istio-system
