@@ -5,24 +5,31 @@ metadata:
   namespace: argocd
 spec:
   generators:
-  - git:
-      repoURL: https://github.com/mathii0402/Polaris.git
-      revision: HEAD
-      directories:
-      - path: applications/*
+    - git:
+        repoURL: https://github.com/mathii0402/Polaris.git
+        revision: main
+        directories:
+          - path: applications/*/manifests/overlays/dev
+
   template:
     metadata:
       name: '{{path.basename}}-dev'
     spec:
       project: default
+
       source:
         repoURL: https://github.com/mathii0402/Polaris.git
-        targetRevision: HEAD
-        path: '{{path}}/manifests/overlays/dev'
+        targetRevision: main
+        path: '{{path}}'
+
       destination:
         server: https://kubernetes.default.svc
         namespace: polaris-apps
+
       syncPolicy:
         automated:
-          prune: true
           selfHeal: true
+          prune: false
+        syncOptions:
+          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
