@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- zero-trust-policy.yaml
+- orders-allow-users-policy.yaml
+- user-and-order-allows-postgres-policy.yaml
+
+namespace: polaris-apps

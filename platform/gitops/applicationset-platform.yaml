@@ -1,0 +1,41 @@
+# platform/gitops/applicationset-dev.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-components
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: istio
+        path: platform/addons/istio
+        namespace: istio-system
+      - name: monitoring
+        path: platform/addons/observability
+        namespace: monitoring
+      - name: networking
+        path: platform/addons/ingress-nginx
+        namespace: ingress-nginx
+      - name: policies
+        path: platform/addons/network-policies
+        namespace: polaris-apps
+  
+  template:
+    metadata:
+      name: '{{name}}-platform'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/mathii0402/Polaris.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+        - CreateNamespace=true
