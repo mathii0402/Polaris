@@ -1,21 +1,21 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: polaris-platform
-  namespace: argocd
-spec:
-  project: default
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: polaris-platform
+#   namespace: argocd
+# spec:
+#   project: default
 
-  source:
-    repoURL: https://github.com/mathii0402/Polaris.git
-    targetRevision: main
-    path: platform/addons
+#   source:
+#     repoURL: https://github.com/mathii0402/Polaris.git
+#     targetRevision: main
+#     path: platform/addons
 
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: argocd
 
-  syncPolicy:
-    automated:
-      selfHeal: true
-      prune: true
+#   syncPolicy:
+#     automated:
+#       selfHeal: true
+#       prune: true
