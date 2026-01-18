@@ -28,7 +28,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/mathii0402/Polaris.git
-        targetRevision: main
+        targetRevision: master
         path: '{{path}}'
       destination:
         server: https://kubernetes.default.svc
