@@ -1,4 +1,4 @@
-# platform/gitops/applicationset-platform.yaml
+# Update platform/gitops/applicationset-platform.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -10,24 +10,24 @@ spec:
       elements:
       - name: istio-crds
         path: platform/addons/istio-crds
-        namespace: istio-system
-        syncwave: "-1"  # Install FIRST (before everything)
-      - name: istio
+        syncwave: "-2"  # Install FIRST
+        destinationNamespace: ""  # CRDs are cluster-scoped
+      - name: istio-base
         path: platform/addons/istio
         namespace: istio-system
-        syncwave: "0"   # Install SECOND (after CRDs)
+        syncwave: "-1"  # Install SECOND
       - name: monitoring
         path: platform/addons/observability
         namespace: istio-system
-        syncwave: "1"   # Install THIRD
+        syncwave: "0"
       - name: networking
         path: platform/addons/ingress-nginx
         namespace: ingress-nginx
-        syncwave: "2"
+        syncwave: "1"
       - name: policies
         path: platform/addons/network-policies
         namespace: polaris-apps
-        syncwave: "3"
+        syncwave: "2"
   
   template:
     metadata:
@@ -49,4 +49,4 @@ spec:
           prune: true
         syncOptions:
         - CreateNamespace=true
-        - RespectIgnoreDifferences=true
+        - ApplyOutOfSyncOnly=true
