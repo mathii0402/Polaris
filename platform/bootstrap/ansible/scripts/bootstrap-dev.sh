@@ -27,7 +27,7 @@ sudo apt install -y software-properties-common curl git python3 python3-pip
 # 2. Install Ansible (latest stable)
 # ------------------------------
 
-if ! command -v ansible >/dev/null 2>&1; then
+if ! command -v ansible-playbook >/dev/null; then
     echo -e "${YELLOW}➡ Installing Ansible...${NC}"
 
     sudo add-apt-repository --yes --update ppa:ansible/ansible
@@ -44,8 +44,8 @@ fi
 
 echo -e "${YELLOW}➡ Running Ansible Dev setup playbook...${NC}"
 
-ANSIBLE_INVENTORY="$ROOT_DIR/bootstrap/ansible/inventory/dev"
-ANSIBLE_PLAYBOOK="$ROOT_DIR/bootstrap/playbooks/dev-setup.yaml"
+ANSIBLE_INVENTORY="$ROOT_DIR/inventory/dev.ini"
+ANSIBLE_PLAYBOOK="$ROOT_DIR/playbooks/dev-setup.yaml"
 
 # --verbose (-vvv) shows live task-by-task output
 ansible-playbook -i "$ANSIBLE_INVENTORY" "$ANSIBLE_PLAYBOOK" -vvv | tee bootstrap-dev.log

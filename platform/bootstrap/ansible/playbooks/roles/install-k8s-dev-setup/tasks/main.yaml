@@ -147,12 +147,59 @@
     path: /usr/local/bin/kind
     mode: "0755"
 
-- name: Create Kind cluster if config exists and cluster not present
+- name: Ensure .kube directory exists for ansible user
   become: true
   become_user: "{{ ansible_user_id }}"
-  command: kind create cluster --config={{ role_path }}/files/kind-cluster.yml 
-  args:
-    creates: "/home/{{ ansible_user_id }}/.kube/config" 
+  file:
+    path: "/home/{{ ansible_user_id }}/.kube"
+    state: directory
+    mode: "0755"
+
+- name: Check if Kind cluster exists
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  command: kind get clusters
+  register: kind_clusters
+  changed_when: false
+
+- name: Create Kind cluster
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  command: kind create cluster --config={{ role_path }}/files/kind-cluster.yml
+  when: "'polaris-dev' not in kind_clusters.stdout"
+
+- name: Ensure kubeconfig ownership is correct
+  become: true
+  file:
+    path: "/home/{{ ansible_user_id }}/.kube/config"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: "0644"
+
+- name: Verify kubectl access as ansible user
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  command: kubectl get nodes
+  register: kubectl_check
+  changed_when: false
+
+- name: Wait for Kubernetes API to be reachable
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  command: kubectl cluster-info
+  register: kube_ready
+  retries: 10
+  delay: 6
+  until: kube_ready.rc == 0
+
+- name: Create Polaris namespaces
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  command: kubectl apply -f {{ item }}
+  loop:
+    - "{{ role_path }}/files/namespaces/polaris-apps.yaml"
+    - "{{ role_path }}/files/namespaces/polaris-data.yaml"
+
   # ignore_errors: true
 
 - name: Print installed versions
